@@ -18,6 +18,7 @@
         <a class="logo" href="#hero">911 <b>GT3 RS</b></a>
         <a class="l" href="#bemutato">Az autó</a><a class="l" href="#adatok">Adatok</a><a class="l"
             href="#galeria">Galéria</a><a class="l" href="#konfig">Konfigurátor</a>
+        <a class="l" href="#palyaido">Pályaidő</a>
         <div class="sw" id="sw" title="Kiemelő szín"><i style="background:#0b86e0" data-c="#0b86e0"></i><i
                 style="background:#e5322d" data-c="#e5322d"></i><i style="background:#2fa84f" data-c="#2fa84f"></i><i
                 style="background:#f2a900" data-c="#f2a900"></i><input type="color" id="pick" value="#0b86e0"
@@ -133,6 +134,22 @@
             <figure><img src="img/kettő.jfif" alt="Porsche 911 Targa hegyi úton"></figure>
         </div>
     </section>
+
+    <section id="palyaido">
+    <h2 class="rv">Pályaidő</h2>
+    <div class="rv">
+        <div class="chips" id="c-trk"></div>
+        <div class="stats" id="wx" aria-live="polite">
+            <div><span class="big" id="wt">–</span><small>°C most</small></div>
+            <div><span class="big" id="ww">–</span><small>km/h szél</small></div>
+            <div><span class="big" id="wp">–</span><small>mm csapadék</small></div>
+            <div><span class="big" id="wc">–</span><small>állapot</small></div>
+        </div>
+        <p id="wv" class="verdict" role="status"></p>
+        <div class="hrs" id="hrs"></div>
+        <small class="src">Adatok: Open-Meteo</small>
+    </div>
+</section>
 
     <section id="konfig">
         <h2 class="rv">Konfigurátor</h2>
