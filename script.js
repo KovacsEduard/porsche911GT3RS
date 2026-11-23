@@ -37,3 +37,31 @@ if(!/^[A-Za-zÀ-ÖØ-öø-ſ]+([ '’.-][A-Za-zÀ-ÖØ-öø-ſ]+)*$/.test(nm))re
 if(!/^[A-Za-z0-9._%+-]+@gmail\.com$/i.test(em))return err('Csak @gmail.com végű e-mail címet fogadunk el.');
 if(bad(nm)||bad(ms)||bad(em.split('@')[0]))return err('Kérjük, kerüld a sértő vagy durva szavakat.');
 $('#er').style.display='none';const o=$('#ok');o.style.display='block';o.textContent='Köszönjük, '+$('#nm').value+'! Üzenetét elküldtük. A konfigurációd ('+$('#sum').textContent+', '+$('#price').textContent+') megérkezett hozzánk, hamarosan jelentkezünk.';$('#f').reset()};
+const T=[['Nürburgring','Németország',50.3356,6.9475],['Hockenheimring','Németország',49.3278,8.5658],['Spa-Francorchamps','Belgium',50.4372,5.9714],['Stuttgart-Zuffenhausen','Porsche központ',48.8354,9.1537]];
+const WC={0:'Derült',1:'Többnyire derült',2:'Változóan felhős',3:'Borult',45:'Köd',48:'Zúzmarás köd',51:'Szitálás',53:'Szitálás',55:'Erős szitálás',56:'Ónos szitálás',57:'Ónos szitálás',61:'Gyenge eső',63:'Eső',65:'Erős eső',66:'Ónos eső',67:'Ónos eső',71:'Gyenge havazás',73:'Havazás',75:'Erős havazás',77:'Hószemcsék',80:'Zápor',81:'Zápor',82:'Heves zápor',85:'Hózápor',86:'Erős hózápor',95:'Zivatar',96:'Zivatar jégesővel',99:'Zivatar jégesővel'};
+let ti=0,wreq=0;
+function trkDraw(){$('#c-trk').innerHTML=T.map((o,i)=>`<div class="chip${ti==i?' sel':''}" tabindex="0" role="button" data-t="${i}">${o[0]}<small>${o[1]}</small></div>`).join('')}
+function verdict(t,p,w,c){
+if(c>=95)return['Zivatar: ma inkább a garázsban a helye az autónak.',0];
+if((c>=71&&c<=77)||c==85||c==86||(c>=56&&c<=57)||(c>=66&&c<=67))return['Havas vagy ónos pálya: ma nem pályanap.',0];
+if(p>0||(c>=51&&c<=65)||(c>=80&&c<=82))return['Nedves aszfalt: a széles hátsó gumi hamar úszik, óvatosan a gázzal.',0];
+if(c==45||c==48)return['Köd: rossz kilátás, lassú tempó.',0];
+if(t<8)return['Hideg aszfalt: a gumi lassan melegszik, az első körök legyenek óvatosak.',0];
+if(w>40)return['Erős szél: egyenesben a nagy sebességnél érezhető lesz.',0];
+return['Száraz, ideális pályanap a GT3 RS-nek.',1]}
+function trkLoad(){
+const id=++wreq,o=T[ti];
+$('#wv').className='verdict';$('#wv').textContent='Adatok betöltése…';
+fetch(`https://api.open-meteo.com/v1/forecast?latitude=${o[2]}&longitude=${o[3]}&current=temperature_2m,precipitation,wind_speed_10m,weather_code&hourly=temperature_2m,precipitation_probability&forecast_days=2&timezone=auto`)
+.then(r=>{if(!r.ok)throw new Error(r.status);return r.json()})
+.then(d=>{
+if(id!=wreq)return;
+const c=d.current,t=Math.round(c.temperature_2m),w=Math.round(c.wind_speed_10m),p=c.precipitation,code=c.weather_code;
+$('#wt').textContent=t;$('#ww').textContent=w;$('#wp').textContent=p.toString().replace('.',',');$('#wc').textContent=WC[code]||'Ismeretlen';
+const v=verdict(t,p,w,code);$('#wv').textContent=v[0];$('#wv').className='verdict'+(v[1]?' ok':'');
+const h=d.hourly,i0=Math.max(0,h.time.findIndex(x=>x.slice(0,13)>=c.time.slice(0,13)));
+$('#hrs').innerHTML=h.time.slice(i0,i0+8).map((x,k)=>`<div><small>${x.slice(11,16)}</small><b>${Math.round(h.temperature_2m[i0+k])}°</b><small>${h.precipitation_probability[i0+k]}% eső</small><i style="--p:${h.precipitation_probability[i0+k]}%"></i></div>`).join('')})
+.catch(()=>{if(id!=wreq)return;['#wt','#ww','#wp','#wc'].forEach(s=>$(s).textContent='–');$('#hrs').innerHTML='';$('#wv').className='verdict';$('#wv').textContent='Az időjárás-adatok most nem érhetők el, próbáld újra később.'})}
+function trkPick(e){const c=e.target.closest('#c-trk .chip');if(!c||(e.type=='keydown'&&e.key!='Enter'&&e.key!=' '))return;if(e.type=='keydown')e.preventDefault();ti=+c.dataset.t;trkDraw();trkLoad()}
+$('#c-trk').addEventListener('click',trkPick);$('#c-trk').addEventListener('keydown',trkPick);
+trkDraw();trkLoad();
